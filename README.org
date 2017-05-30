@@ -1,0 +1,162 @@
+* Kimia Path24
+
+/Kimia Path24/ is dataset for image classification and retrieval in digital
+pathology. It contains 24 whole scan images (WSIs) of different tissue textures.
+Dataset contains 1,325 test patches of size 1000 x 1000 (0.5mm × 0.5mm)
+extracted from one of the 24 WSIs. Patches for training algorithms can be
+generated according to preferences of the algorithm designer using provided WSIs
+(test patches are whitened). Approximately 27,000 to over 50,000 training
+patches (1000 x 1000) can be extracted if the preset parameters are adopted.
+
+** Dataset file
+
+Entire dataset is provided in a single HDF5 file =Kimia_Path24.h5=. 
+
+| File Name | Kimia_Path24.h5                  |
+| File Size | 29409M                           |
+| MD5SUM    | aeb54db89aaf28455e06770d20bd1307 |
+
+
+** Dataset organization
+
+Data is organized in a hierarchy as follows.
+
+#+begin_src text
+
+|
++ -- scan0
+|   |
+|   + -- data (x, y)
+|   |
+|   + -- thumbnail
+|
++ -- scan1
+|   |
+|   + -- data (x, y)
+|   |
+|   + -- thumbnail
+.
+.
+.
+|
++ -- scan23
+|   |
+|   + -- data (m, n)
+|   |
+|   + -- thumbnail
+|
++ -- test_data
+    |
+    + -- patches (1325, 1000, 1000)
+    |
+    + -- targets (1325, )
+
+#+end_src
+
+Scans are labeled from 0 -- 23 and they can be accessed via =\scan{id}\data=.
+For convenience purposes thumbnail of each scan is provided accessed via
+=\scan{id}\thumbnail=, however no scaling standard is used for thumbnail and it
+must not be used for interpolating back to original scan data. Test data
+contains 1325 patches from one of the 24 scans accessed via =\test_data\patches=
+and its corresponding targets =\test_data\targets= for evaluation purposes.
+Location from where test patches are extracted are whitened in the original
+WSIs, therefore such patches must be identified during extraction training
+patches.
+
+
+** Reading data examples in Python and MATLAB
+
+*** Reading data of scan with label 1
+
+Python (h5py required):
+
+#+BEGIN_SRC python
+  import h5py as h5
+  data = h5.File('Kimia_Path24.h5', 'r')
+  I = data['/scan1/data']
+#+END_SRC
+
+MATLAB:
+
+#+BEGIN_SRC matlab
+  I=h5read('Kimia_Path24.h5', '/scan1/data');
+  I=I'; %The images must be transposed to be same as images in Phyton.
+#+END_SRC
+
+*** Iterating over patches of scan with label 1
+
+Python (h5py required):
+
+#+BEGIN_SRC python
+  # This is simple code snippet showing how to read patches without any overlap.
+  # Algorithm designer may want to read patches with overlap and also be able to
+  # ignore less interesting patches (not containing useless information).
+
+
+  import h5py as h5
+  data = h5.File('Kimia_Path24.h5', 'r')
+  scan1_data = data['/scan1/data']
+
+  x_max, y_max = scan1_data.shape
+
+  # creating patches of size (1000, 1000)
+  patch_size = 1000
+
+  x_max_iter = int(x_max/patch_size) - 1
+  y_max_iter = int(y_max/patch_size) - 1
+
+  for x in range(x_max_iter):
+      for y in range(y_max_iter):
+          x_loc = x*patch_size
+          y_loc = y*patch_size
+
+          # read the patch
+          patch = scan1_data[x_loc:x_loc+patch_size, y_loc:y_loc+patch_size]
+#+END_SRC
+
+MATLAB:
+
+*Currently not done!!*
+
+*** Reading test data and generating CSV file for predictions
+
+There are 1325 test patches each of size (1000, 1000). Classification algorithm
+will predict their label from 0 -- 23. For evaluation, create the CSV file
+containing prediction labels for all 1325 patches in exact same order as given
+in H%PY file.
+
+Python:
+
+#+BEGIN_SRC python
+  import h5py as h5
+
+  data = h5.File('Kimia_Path24.py', 'r')
+  test_patches = data['/test_data/patches']
+
+  predictions = map(lambda test_patch: predict(test_patch), test_patches)
+
+  # write predictions to csv file for evaluation purpose
+#+END_SRC
+
+
+** Evaluation
+
+Evaluation script is provided in both MATLAB and Python.
+
+** Citing KimiaPath24
+
+Authors of scientific papers including results generated using KimiaPath24
+dataset are encouraged to cite the following paper.
+
+#+BEGIN_SRC text
+@article{kimiapath24_2017,
+  title = {Classification and {{Retrieval}} of {{Digital Pathology Scans}}: {{A New Dataset}}},
+  url = {http://arxiv.org/abs/1705.07522},
+  shorttitle = {Classification and {{Retrieval}} of {{Digital Pathology Scans}}},
+  abstract = {In this paper, we introduce a new dataset, $\backslash$textbf\{Kimia Path24\}, for image classification and retrieval in digital pathology. We use the whole scan images of 24 different tissue textures to generate 1,325 test patches of size 1000\$$\backslash$times\$1000 (0.5mm\$$\backslash$times\$0.5mm). Training data can be generated according to preferences of algorithm designer and can range from approximately 27,000 to over 50,000 patches if the preset parameters are adopted. We propose a compound patch-and-scan accuracy measurement that makes achieving high accuracies quite challenging. In addition, we set the benchmarking line by applying LBP, dictionary approach and convolutional neural nets (CNNs) and report their results. The highest accuracy was 41.80$\backslash$\% for CNN.},
+  archivePrefix = {arXiv},
+  eprinttype = {arxiv},
+  eprint = {1705.07522},
+  author = {Babaie, Morteza and Kalra, Shivam and Sriram, Aditya and Mitcheltree, Christopher and Zhu, Shujin and Khatami, Amin and Rahnamayan, Shahryar and Tizhoosh, H. R.},
+}
+#+END_SRC
