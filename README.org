@@ -53,12 +53,12 @@ Data is organized in a hierarchy as follows.
     |
     + -- targets (1325, )
 #+end_src
-Scans are labeled from 0 to 23 and can be accessed via =\scan{id}\data=.
-For convenience, the thumbnail of each scan is provided and accessed via
+Scans are labeled from 0 to 23 and can be accessed via =\scan{id}\data=. For
+convenience, the thumbnail of each scan is provided and accessed via
 =\scan{id}\thumbnail=. However, no scaling standard is used for thumbnail and it
 must not be used for interpolating back to original scan data. The test data
-contains 1325 patches from all 24 scans, accessed via =\test_data\patches=
-and their corresponding targets =\test_data\targets= for evaluation purposes.
+contains 1325 patches from all 24 scans, accessed via =\test_data\patches= and
+their corresponding targets =\test_data\targets= for evaluation purposes.
 Location from where test patches are extracted are whitened in the original
 WSIs, therefore such patches must be identified during extraction of training
 patches.
